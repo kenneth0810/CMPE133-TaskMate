@@ -22,7 +22,7 @@ with myapp.app_context():
     db.create_all()
 
 login = LoginManager(myapp)
-
+login.init_app(myapp)
 login.login_view = 'login'
 
 from app import routes, models
