@@ -13,7 +13,7 @@ from flask_login import login_required
 def load_user(id):
     return User.query.get(int(id))
 
-# landing page!
+# landing page
 @myapp.route('/')
 def index():
     return render_template('index.html')
