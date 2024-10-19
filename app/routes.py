@@ -10,6 +10,11 @@ from flask_login import logout_user
 from flask_login import login_required
 
 # landing page
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+# landing page 
 @myapp.route('/')
 def index():
     return render_template('index.html')
@@ -30,3 +35,30 @@ def register():
             db.session.commit()
             return redirect('/login')
     return render_template('register.html', form=form)
+# Login route 
+@myapp.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))  # Redirect user if already logged in
+
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user)
+            flash('Logged in successfully!', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid email or password', 'danger')
+
+    return render_template('login.html', form=form)
+
+print(myapp.url_map)
+
+# Logout route
+@myapp.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('index'))

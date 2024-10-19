@@ -1,0 +1,77 @@
+/* static/login.css */
+body 
+{
+    background-color: #14213d;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container 
+{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-form 
+{
+    background-color: #14213d;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    width: 350px;
+}
+
+h1 
+{
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+
+input 
+{
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 2px solid #444444;
+    border-radius: 5px;
+    box-sizing: border-box;
+    color: hsla(225, 95%, 70%, 0.854); 
+    background-color: #ffffff;  
+}
+
+label 
+{
+    color: white;  
+    font-size: 16px;  
+    margin-bottom: -25px; 
+    display: block;  
+}
+
+
+button 
+{
+    width: 100%;
+    padding: 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+.flash-message 
+{
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    text-align: center;
+}
