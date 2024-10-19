@@ -35,11 +35,12 @@ def register():
             db.session.commit()
             return redirect('/login')
     return render_template('register.html', form=form)
-# Login route 
+
+
 @myapp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))  # Redirect user if already logged in
+        return redirect(url_for('index')) 
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -55,7 +56,7 @@ def login():
 
 print(myapp.url_map)
 
-# Logout route
+
 @myapp.route('/logout')
 @login_required
 def logout():
