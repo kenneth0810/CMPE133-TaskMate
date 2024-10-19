@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+</head>
+<body>
+    <div class="container">
+      
+        {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="flash-message">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+
+        
+        <form class="login-form" method="POST" action="/login">
+            <h1>Welcome to TaskMate!</h1>
+            {{ form.hidden_tag() }}
+
+            <div>
+                {{ form.email.label }}<br>
+                {{ form.email(size=32) }}
+            </div>
+
+            <div>
+                {{ form.password.label }}<br>
+                {{ form.password(size=32) }}
+            </div>
+
+            <div>
+                {{ form.submit() }}
+            </div>
+        </form>
+    </div>
+</body>
+</html>
