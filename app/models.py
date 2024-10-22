@@ -11,12 +11,15 @@ import base64
 class User(db.Model, UserMixin):
     # User's ID:
     id = db.Column(db.Integer, primary_key=True)
-    # Username:
-    username = db.Column(db.String(32), nullable=False)
-    # User's password:
-    password = db.Column(db.String(32), nullable=False)
+    # firstname:
+    firstname = db.Column(db.String(32), nullable=False)
+    # lastname:
+    lastname = db.Column(db.String(32), nullable=False)
+
     # User's email:
     email = db.Column(db.String(100), nullable=False, unique=True)
+    # User's password:
+    password = db.Column(db.String(32), nullable=False)
 
     # Set up relationship with class Post:
     posts = db.relationship('Post', backref='author', lazy='dynamic')
