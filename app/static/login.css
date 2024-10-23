@@ -15,7 +15,7 @@ body
     height: 100vh;
 }
 
-.login-form 
+.login-form, .register-form 
 {
     background-color: #edeff2;
     padding: 30px;
