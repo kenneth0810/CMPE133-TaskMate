@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, EmailField, TextAreaField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, EmailField, TextAreaField, SelectField, DateField, TimeField
 from wtforms.validators import DataRequired, EqualTo, Email, Length, ValidationError
 from .models import User
 
@@ -30,8 +30,15 @@ class PasswordResetInAccountForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class TaskForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired()])
-    description = StringField('Description')
-    priority = IntegerField('Priority')
-    due_date = DateField('Due Date')
-    due_time = TimeField('Due Time')
+    title = StringField('Task Title', validators=[DataRequired()])
+    description = StringField('Task Description', default=None)
+    priority = SelectField('Priority', choices=[
+        ('', 'None'),
+        (1, 'Low'),
+        (2, 'Medium'),
+        (3, 'High')
+    ], default=None)
+    due_date = DateField('Due Date', format='%m-%d-%Y', default=None)
+    due_time = TimeField('Due Time', format='%I:%M %p', default=None)
+    is_completed = BooleanField('Complete Task', default=False)
+    submit = SubmitField('Create Task')
