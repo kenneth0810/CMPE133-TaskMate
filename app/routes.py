@@ -1,6 +1,6 @@
 from app import myapp, db, login
 from app.forms import LoginForm, RegistrationForm
-from app.models import User
+from app.models import User, Task
 from flask import render_template
 from flask import redirect, request, session, url_for
 from flask import flash, get_flashed_messages
@@ -31,30 +31,39 @@ def register():
             user.set_password(form.password.data)
             db.session.add(user)
             db.session.commit()
+
             flash(f'Successfully registered account for {user.email}', 'success')
-            return redirect('/login')
+            login_user(user)
+
+            return redirect(url_for('index'))
     return render_template('register.html', form=form)
 
 
 @myapp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
+        flash('An Account Is Already Logged In')
+        print("Current User:", current_user)
         return redirect(url_for('index')) 
 
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if user and user.check_password(form.password.data):
-            login_user(user)
-            flash('Logged in successfully!', 'success')
-            return redirect(url_for('index'))
+        if user != None:
+            if user.check_password(form.password.data):
+                login_user(user)
+                flash('Logged in successfully!', 'success')
+                next_page = request.form.get('next')
+                if next_page:
+                    return redirect(next_page)
+                else:
+                    return redirect(url_for('index'))
+            else:
+                flash("Incorrect Password", 'danger')
         else:
-            flash('Invalid email or password', 'danger')
+            flash("No record of account under the entered email", 'danger')
 
     return render_template('login.html', form=form)
-
-print(myapp.url_map)
-
 
 @myapp.route('/logout')
 @login_required
@@ -62,3 +71,24 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'info')
     return redirect(url_for('index'))
+
+@myapp.route('/account')
+@login_required
+def account():
+    user_id = current_user.id
+    email = current_user.email
+    return render_template('account.html', id = email)
+
+@myapp.route('/tasks')
+@login_required
+def tasks():
+    current_user_id = current_user.id
+    task_title = "Finalize Task"
+    task_description = "" 
+    task_due_date = None
+    new_task = Task(title = task_title, description = task_description, due_date = task_due_date, user_id = current_user_id)
+    db.session.add(new_task)
+    db.session.commit()
+    return render_template('tasks.html', title = task_title)
+
+print("URL Map", myapp.url_map)
