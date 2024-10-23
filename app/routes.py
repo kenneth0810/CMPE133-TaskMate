@@ -24,15 +24,14 @@ def index():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        if User.query.filter_by(username=form.username.data).first():
-            flash('This username is unavailable. Please use another username.')
         if User.query.filter_by(email=form.email.data).first():
-            flash('This email is already registered. Please login or use another email.')
+            flash('This email is already registered. Please login or use another email.', 'danger')
         else:
-            user = User(username=form.username.data, email=form.email.data)
+            user = User(first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data)
             user.set_password(form.password.data)
             db.session.add(user)
             db.session.commit()
+            flash(f'Successfully registered account for {user.email}', 'success')
             return redirect('/login')
     return render_template('register.html', form=form)
 
