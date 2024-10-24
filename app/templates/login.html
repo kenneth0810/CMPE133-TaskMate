@@ -19,12 +19,15 @@
         {% endfor %}
     {% endif %}
 {% endwith %}
-
-
         
         <form class="login-form" method="POST" action="/login">
             <h1>Welcome to TaskMate!</h1>
             {{ form.hidden_tag() }}
+
+            <!-- Add a hidden input for the next parameter if it exists -->
+            {% if request.args.get('next') %}
+            <input type="hidden" name="next" value="{{ request.args.get('next') }}">
+            {% endif %}
 
             <div>
                 {{ form.email.label }}<br>

@@ -11,10 +11,11 @@ import base64
 class User(db.Model, UserMixin):
     # User's ID:
     id = db.Column(db.Integer, primary_key=True)
+    
     # firstname:
-    firstname = db.Column(db.String(32), nullable=False)
+    first_name = db.Column(db.String(32), nullable=False)
     # lastname:
-    lastname = db.Column(db.String(32), nullable=False)
+    last_name = db.Column(db.String(32), nullable=False)
 
     # User's email:
     email = db.Column(db.String(100), nullable=False, unique=True)
@@ -60,7 +61,7 @@ class User(db.Model, UserMixin):
 
     # Function that returns 1 string every time creating 1 new row (user): 
     def __repr__(self):
-        return f'<User {self.id}: {self.username}, {self.fullname}>'
+        return f'<User {self.id}: {self.email}>'
 
 # Set up the table Post with different columns in Database:
 class Post(db.Model):
@@ -87,11 +88,11 @@ class Task(db.Model):
     # Task Description:
     description = db.Column(db.Text)
     # Task Priority:
-    priority = db.Column(db.String(10), nullable=True)  # Values like 'low', 'medium', 'high'
+    priority = db.Column(db.String(10))  # Values like 'low', 'medium', 'high'
     # Task Due Date:
-    due_date = db.Column(db.Date, nullable=False)
+    due_date = db.Column(db.Date)
     # Task Due Time:
-    due_time = db.Column(db.Time, nullable=False)
+    due_time = db.Column(db.Time)
     # Task Status
     is_completed = db.Column(db.Boolean, default=False)
     
