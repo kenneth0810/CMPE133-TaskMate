@@ -1,1 +1,19 @@
 {% extends "index.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="../static/tasks.css">
+
+<div class="container text-center">
+    <h1>Your Tasks</h1>
+    <form action="">
+        {{ form.hidden_tag() }}
+        <div class="task-input">
+            {{ form.title(placeholder="New Task Title") }}
+            {% for error in form.title.errors %}
+            <span class="text-danger">{{ error }}</span>
+            {% endfor %}
+            {{ form.submit }}
+        </div>
+    </form>
+</div>
+{% endblock %}
