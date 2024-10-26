@@ -79,18 +79,40 @@ def account():
     email = current_user.email
     return render_template('account.html', id = email)
 
-@myapp.route('/tasks')
+@myapp.route('/tasks', methods = ['GET', 'POST'])
 @login_required
 def tasks():
     form = TaskForm()
     if form.validate_on_submit():
-        if form.title == None:
+        if form.title.data == None:
             flash('Task must have title.')
-            return
+            print('TTIITITLEE')
         else:
-            task = Task(title=form.title, description=form.description, priority=form.priority, due_date=form.due_date, due_time=form.due_time)
+            print('CRETATTTEDDD')
+            task = Task(user_id=current_user.id, title=form.title.data, description=form.description.data, priority=form.priority.data, due_date=form.due_date.data, due_time=form.due_time.data)
             db.session.add(task)
             db.session.commit()
-    return render_template('tasks.html', form=form)
+            flash('Successfully created new task.')
+            tasks = Task.query.filter(Task.user_id==current_user.id).all()
+            return redirect(url_for('tasks'))
+        
+    else:
+        print(form.errors)
+    tasks = Task.query.filter(Task.user_id==current_user.id).all()
+    print('no task')
+    return render_template('tasks.html', form=form, tasks=tasks)
+
+
+# @myapp.route('/create-task/<string:title>', methods = ['GET', 'POST'])
+# @login_required
+# def create_task(title):
+#     form = TaskForm()
+#     if form.validate_on_submit():
+#         task = Task(user_id = current_user.id, title = title, description = form.description.data, priority=form.priority.data, due_date=form.due_date.data, due_time=form.due_time.data, is_completed=False)
+#         db.session.add(task)
+#         db.session.commit()
+#         tasks = Task.query.filter(Task.user_id==current_user.id).all()
+#         flash('Successfully created a new task.')
+#         return redirect(url_for('tasks', tasks=tasks, task=task))
 
 print("URL Map", myapp.url_map)

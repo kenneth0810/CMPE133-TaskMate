@@ -5,17 +5,21 @@
 
 <div class="container text-center">
     <h1>Your Tasks</h1>
-    <form action="">
-        {{ form.hidden_tag() }}
-        <div class="task-input">
-            {{ form.title(placeholder="New Task Title") }}
-            {% for error in form.title.errors %}
-            <span class="text-danger">{{ error }}</span>
-            {% endfor %}
-            <button type="button" class="btn btn-primary" id="openModalButton">Create Task</button>
-        </div>
-        </div>
-    </form>
+    <div class="task-input">
+        <button type="button" class="btn btn-primary" id="openModalButton">Create Task</button>
+    </div>
+
+    {% if not tasks %}
+    <p>You have no tasks.</p>
+    {% else %}
+    <ul>
+        {% for task in tasks %}
+        <li>
+            {{ task }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 </div>
 
 <!-- Bootstrap Modal -->
@@ -27,11 +31,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="" method="post">
+                <form action="{{ url_for('tasks') }}" method="post">
                     {{ form.hidden_tag() }}
                     <div class="mb-3">
-                        <label>Title</label>
-                        <p id="modalTitle" class="form-control"></p>
+                        <label for="title">Title</label>
+                        {{ form.title(class="form-control") }}
                     </div>
                     <div class="mb-3">
                         {{ form.description(placeholder="Task Description", class="form-control") }}
@@ -59,16 +63,7 @@
 </div>
 
 <script>
-    document.getElementById('openModalButton').addEventListener('click', function() {
-        // Get the task title from the input field
-        const title = document.querySelector('[name="title"]').value;
-        if (title) {
-            document.getElementById('modalTitle').innerText = title;
-        }
-        else {
-            return;
-        }
-    
+    document.getElementById('openModalButton').addEventListener('click', function() {    
         // Show the modal
         var myModal = new bootstrap.Modal(document.getElementById('taskModal'));
         myModal.show();
