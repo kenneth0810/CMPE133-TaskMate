@@ -31,7 +31,7 @@ class PasswordResetInAccountForm(FlaskForm):
 
 class TaskForm(FlaskForm):
     title = StringField('Task Title', validators=[DataRequired()])
-    description = StringField('Task Description', default=None)
+    description = TextAreaField('Task Description', default=None)
     priority = SelectField('Priority', choices=[
         ('', 'None'),
         (1, 'Low'),
