@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, EmailField, TextAreaField, SelectField, DateField, TimeField
-from wtforms.validators import DataRequired, EqualTo, Email, Length, ValidationError
+from wtforms.validators import DataRequired, EqualTo, Email, Length, ValidationError, Optional
 from .models import User
 
 class LoginForm(FlaskForm):
@@ -38,7 +38,7 @@ class TaskForm(FlaskForm):
         (2, 'Medium'),
         (3, 'High')
     ], default=None)
-    due_date = DateField('Due Date', format='%m-%d-%Y', default=None)
-    due_time = TimeField('Due Time', format='%I:%M %p', default=None)
+    due_date = DateField('Due Date', default=None, validators=[Optional()])
+    due_time = TimeField('Due Time', default=None, validators=[Optional()])
     is_completed = BooleanField('Complete Task', default=False)
     submit = SubmitField('Create Task')

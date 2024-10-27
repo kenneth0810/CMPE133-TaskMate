@@ -15,7 +15,11 @@
     <ul>
         {% for task in tasks %}
         <li>
-            {{ task }}
+            {{ task.title }}
+            {{ task.description }}
+            {{ task.priority }}
+            {{ task.due_date }}
+            {{ task.due_time }}
         </li>
         {% endfor %}
     </ul>
@@ -46,11 +50,11 @@
                     </div>
                     <div class="mb-3">
                         <label for="due-date">Due Date</label>
-                        {{ form.due_date(class="form-control", placeholder="MM-DD-YYYY") }}
+                        {{ form.due_date(class="form-control", placeholder="MM-DD-YYYY", type="date") }}
                     </div>
                     <div class="mb-3">
                         <label for="due-time">Due Time</label>
-                        {{ form.due_time(class="form-control", placeholder="HH:MM AM/PM") }}
+                        {{ form.due_time(class="form-control", placeholder="HH:MM AM/PM", type="time") }}
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
