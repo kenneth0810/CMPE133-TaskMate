@@ -1,16 +1,78 @@
-/* input[type=text] {
-    border: none;
-    border-bottom: 1px solid #BFC0C0;
-    outline: none;
-    width: 50%;
-    padding: 10px;
-    background-color: aliceblue;
-} */
-
 h1 {
     margin-top: 2%;
 }
 
 body {
     background-color: aliceblue;
+}
+
+.no-tasks {
+    margin-top: 10px;
+}
+
+.all-tasks {
+    margin-top: 2%;
+}
+
+.task, .header {
+    display: flex;
+    flex-direction: row;
+    padding: 5px;
+    margin: 5px 0;
+}
+
+/* .header > * {
+    border: 1px solid black;
+} */
+
+span {
+    border: 1px solid black;
+    padding: 5px;
+    text-align: left;
+}
+
+svg {
+    fill: #2D3142;
+    height: 20px;
+}
+
+.actions {
+    width: 10%;
+    text-align: center;
+}
+
+.actions-header {
+    text-align: left;
+}
+
+.title {
+    width: 30%;
+}
+
+.description {
+    width: 40%;
+}
+
+.priority {
+    width: 15%;
+}
+
+.due-date {
+    width: 15%;
+}
+
+.due-time {
+    width: 15%;
+}
+
+.complete {
+    fill: cadetblue;
+}
+
+.delete {
+    fill: red
+}
+
+.edit {
+    fill: green;
 }
