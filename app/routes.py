@@ -1,5 +1,5 @@
 from app import myapp, db, login
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, TaskForm
 from app.models import User, Task
 from flask import render_template
 from flask import redirect, request, session, url_for
@@ -79,16 +79,21 @@ def account():
     email = current_user.email
     return render_template('account.html', id = email)
 
-@myapp.route('/tasks')
+@myapp.route('/tasks', methods = ['GET', 'POST'])
 @login_required
 def tasks():
-    current_user_id = current_user.id
-    task_title = "Finalize Task"
-    task_description = "" 
-    task_due_date = None
-    new_task = Task(title = task_title, description = task_description, due_date = task_due_date, user_id = current_user_id)
-    db.session.add(new_task)
-    db.session.commit()
-    return render_template('tasks.html', title = task_title)
+    form = TaskForm()
+    if form.validate_on_submit():
+        if form.title.data == None:
+            flash('Task must have title.')
+        else:
+            task = Task(user_id=current_user.id, title=form.title.data, description=form.description.data, priority=form.priority.data, due_date=form.due_date.data, due_time=form.due_time.data)
+            db.session.add(task)
+            db.session.commit()
+            flash('Successfully created new task.')
+            tasks = Task.query.filter(Task.user_id==current_user.id).all()
+            return redirect(url_for('tasks'))
+    tasks = Task.query.filter(Task.user_id==current_user.id).all()
+    return render_template('tasks.html', form=form, tasks=tasks)
 
 print("URL Map", myapp.url_map)

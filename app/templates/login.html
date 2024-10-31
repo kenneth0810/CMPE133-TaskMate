@@ -8,17 +8,17 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
 </head>
 <body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+        <div class="flash-message">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
     <div class="container">
       
-        {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="flash-message">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
         
         <form class="login-form" method="POST" action="/login">
             <h1>Welcome to TaskMate!</h1>
