@@ -1,7 +1,7 @@
 from app import myapp, db, login
 from app.forms import LoginForm, RegistrationForm, TaskForm
 from app.models import User, Task
-from flask import render_template
+from flask import jsonify, render_template
 from flask import redirect, request, session, url_for
 from flask import flash, get_flashed_messages
 from flask_login import current_user
@@ -84,16 +84,40 @@ def account():
 def tasks():
     form = TaskForm()
     if form.validate_on_submit():
-        if form.title.data == None:
-            flash('Task must have title.')
-        else:
+        edit_task_id = request.form.get('entry')
+        print(edit_task_id)
+        if edit_task_id == "0": # if edit_task_id isn't greater than 0, then it's a regular add task action
             task = Task(user_id=current_user.id, title=form.title.data, description=form.description.data, priority=form.priority.data, due_date=form.due_date.data, due_time=form.due_time.data)
             db.session.add(task)
             db.session.commit()
             flash('Successfully created new task.')
-            tasks = Task.query.filter(Task.user_id==current_user.id).all()
+            tasks = Task.query.filter(Task.user_id==current_user.id).filter(Task.is_completed==False).all()
             return redirect(url_for('tasks'))
-    tasks = Task.query.filter(Task.user_id==current_user.id).all()
+        else:
+            findTask = Task.query.filter_by(id=edit_task_id).first()
+            form.populate_obj(findTask)
+            db.session.commit()
+    tasks = Task.query.filter(Task.user_id==current_user.id).filter(Task.is_completed==False).all()
     return render_template('tasks.html', form=form, tasks=tasks)
+
+@myapp.route('/delete_task/<task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    task = Task.query.filter_by(id=task_id).first()
+    db.session.delete(task)
+    db.session.commit()
+    return jsonify({'success': True, 'message': f'Task {task_id} successfully deleted.'})
+
+@myapp.route('/edit_task/<task_id>', methods=['GET'])
+def edit_task(task_id):
+    task = Task.query.filter_by(id=task_id).first()
+    task_dict = {key: value for key, value in task.__dict__.items() if not key.startswith('_')}
+    return jsonify({'success': True, 'message': f'Task {task_id} details retrieved.', 'task': task_dict})
+
+@myapp.route('/complete_task/<task_id>', methods=['PATCH'])
+def complete_task(task_id):
+    task = Task.query.filter_by(id=task_id).first()
+    task.is_completed = True
+    db.session.commit()
+    return jsonify({'success': True, 'message': f'Task {task_id} successfully marked as complete.'})
 
 print("URL Map", myapp.url_map)
