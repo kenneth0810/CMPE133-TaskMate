@@ -40,56 +40,155 @@
             </span>
         </div>
         {% for task in tasks %}
-        <div class="task">
+        <div class="task" id = {{task.id}}>
             <span class="actions">
-                <a href=""><svg class="complete" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m424-312 282-282-56-56-226 226-114-114-56 56 170 170ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z"/></svg></a>
-                <a href=""><svg class="delete" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg></a>
-                <a href=""><svg class="edit" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg></a>
+                <a href="{{ url_for('complete_task', task_id=task.id) }}" class = "complete"><svg class="complete" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="m424-312 282-282-56-56-226 226-114-114-56 56 170 170ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z"/></svg></a>
+                <a href="{{ url_for('delete_task', task_id=task.id) }}" class = "delete"><svg class ="delete" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg></a>
+                <a href="{{ url_for('edit_task', task_id=task.id) }}" class = "edit"><svg class="edit" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg></a>
             </span>
-            <span class="title">{{ task.title }}</span>
-            <span class="description">{{ task.description }}</span>
-            <span class="due-date">{{ task.due_date }}</span>
-            <span class="due-time">{{ task.due_time }}</span>
-            <span class="priority">{{ task.priority }}</span>
+            <span class="title" value = {{task.title}}>{{ task.title }}</span>
+            <span class="description" value = {{task.description}}>{{ task.description }}</span>
+            <span class="due-date" value = {{task.due_date}}>{{ task.due_date }}</span>
+            <span class="due-time" value = {{task.due_time}}>{{ task.due_time }}</span>
+            <span class="priority" value = {{task.priority}}>
+                {% if task.priority == "1" %}
+                Low
+                {% elif task.priority == "2" %}
+                Medium
+                {% elif task.priority == "3" %}
+                High
+                {% else %}
+                None
+                {% endif %}
+            </span>
         </div>
         {% endfor %}
     </div>
     {% endif %}
 </div>
 
+<script>
+    document.querySelector('.all-tasks').addEventListener('click', function(event) {
+        event.preventDefault();
+
+        if (event.target.closest('.delete') || event.target.closest('.edit') || event.target.closest('.complete')) {
+            const taskElement = event.target.closest('.task');
+            const taskId = taskElement.id;
+
+            if (taskId) {
+                console.log('Task ID:', taskId); 
+
+                // Use taskId to perform the specific action:
+                if (event.target.closest('.delete')) {
+                    console.log(`Deleting ${taskId}`);
+                    fetch(`/delete_task/${taskId}`, {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json',}
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log(data.message);
+                            taskElement.remove();
+                        } else {
+                            console.error('Failed to delete the task.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                } else if (event.target.closest('.edit')) {
+                    console.log(`Editing ${taskId}`);
+                    const editTaskId = document.getElementById("et");
+                    editTaskId.value = taskId;
+                    fetch(`/edit_task/${taskId}`, {
+                    method: 'GET',
+                    headers: {'Content-Type': 'application/json',}
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log(data.message);
+                            const task_details = data.task
+                            document.getElementById("title").value = task_details.title;
+                            document.getElementById("description").value = task_details.description;
+                            document.getElementById("priority").value = task_details.priority;
+                            // document.getElementById("due_date").value = task_details.due_date;
+                            // document.getElementById("due_time").value = task_details.due_time;
+                        } else {
+                            console.error('Failed to get task details for editing.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                    document.getElementById("submit").value = "Edit Task"
+                    var editModal = new bootstrap.Modal(document.getElementById('taskModal'));
+                    editModal.show();
+                } else if (event.target.closest('.complete')) {
+                    console.log(`Completing ${taskId}`);
+                    fetch(`/complete_task/${taskId}`, {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json',}
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log(data.message);
+                            taskElement.remove();
+                        } else {
+                            console.error('Failed to mark the task as complete.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            }
+        }
+    });
+</script>
+
+<script>
+function reset() {
+    document.getElementById("et").value = "0"; 
+    document.getElementById("submit").value = "Create Task";
+    document.getElementById("title").value = "";
+    document.getElementById("description").value = "";
+    document.getElementById("priority").value = "";
+    // document.getElementById("due_date").value = "";
+    // document.getElementById("due_time").value = "";
+}
+</script>
+
 <!-- Bootstrap Modal -->
-<div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
+<div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true" style="display: none;">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="taskModalLabel">Add Task Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="reset()"></button>
             </div>
             <div class="modal-body">
                 <form action="{{ url_for('tasks') }}" method="post">
+                    <input id = "et" type="hidden" name="entry" value="0">
                     {{ form.hidden_tag() }}
                     <div class="mb-3">
                         <label for="title">Title</label>
-                        {{ form.title(class="form-control") }}
+                        {{ form.title(class="form-control", id="title") }}
                     </div>
                     <div class="mb-3">
-                        {{ form.description(placeholder="Task Description", class="form-control") }}
+                        {{ form.description(placeholder="Task Description", class="form-control", id="description") }}
                     </div>
                     <div class="mb-3">
                         <label for="priority">Priority</label>
-                        {{ form.priority(class="form-select") }}
+                        {{ form.priority(class="form-select", id="priority") }}
                     </div>
                     <div class="mb-3">
                         <label for="due-date">Due Date</label>
-                        {{ form.due_date(class="form-control", placeholder="MM-DD-YYYY", type="date") }}
+                        {{ form.due_date(class="form-control", placeholder="MM-DD-YYYY", type="date", id="due_date") }}
                     </div>
                     <div class="mb-3">
                         <label for="due-time">Due Time</label>
-                        {{ form.due_time(class="form-control", placeholder="HH:MM AM/PM", type="time") }}
+                        {{ form.due_time(class="form-control", placeholder="HH:MM AM/PM", type="time", id="due_time") }}
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        {{ form.submit(class="btn btn-primary") }}
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="document.getElementById('et').value = '0';document.getElementById('submit').value = 'Create Task';document.getElementById('title').value = '';document.getElementById('description').value = '';document.getElementById('priority').value = '';">Cancel</button>
+                        {{ form.submit(class="btn btn-primary", id = "submit") }}
                     </div>
                 </form>
             </div>
