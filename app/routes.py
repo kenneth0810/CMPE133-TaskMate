@@ -1,6 +1,6 @@
 from app import myapp, db, login
-from app.forms import LoginForm, RegistrationForm, TaskForm
-from app.models import User, Task
+from app.forms import LoginForm, RegistrationForm, TaskForm, BioForm, PasswordForm, DeleteForm
+from app.models import User, Task, Profile
 from flask import jsonify, render_template
 from flask import redirect, request, session, url_for
 from flask import flash, get_flashed_messages
@@ -10,6 +10,7 @@ from flask_login import logout_user
 from flask_login import login_required
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
+from datetime import datetime
 
 # landing page
 @login.user_loader
@@ -74,13 +75,6 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('index'))
 
-@myapp.route('/account')
-@login_required
-def account():
-    user_id = current_user.id
-    email = current_user.email
-    return render_template('account.html', id = email)
-
 @myapp.route('/tasks', methods = ['GET', 'POST'])
 @login_required
 def tasks():
@@ -124,3 +118,140 @@ def complete_task(task_id):
 
 print("URL Map", myapp.url_map)
 
+@myapp.route("/account", methods=['GET', 'POST'])
+@login_required
+def account():
+    user_id = current_user.id
+    email = current_user.email
+    bio_form = BioForm()
+    if bio_form.validate_on_submit() and request.method == "POST":
+        #if a current bio exists and a new bio is submitted, delete the current bio and replace it with the new bio
+        curr_bio = Profile.query.filter_by(user_id=current_user.id).first()
+        if curr_bio:
+            db.session.delete(curr_bio)
+        new_bio = Profile(user_id=current_user.id, bio=bio_form.bio.data)
+        db.session.add(new_bio)
+        db.session.commit()
+        flash('Successfully Updated a nNew Bio.')
+        return redirect(url_for('account'))
+    else:
+        #if nothing is submitted, the bio form will be empty, so assign the form.bio to the current bio so that the bio will be visible in the profile
+        curr_bio = Profile.query.filter_by(user_id=current_user.id).first()
+
+        if curr_bio:
+            bio_form.bio.data = curr_bio.bio
+    
+    pw_form = PasswordForm()
+    if pw_form.validate_on_submit() and request.method == "POST":
+        user = current_user
+        if user.check_password(pw_form.old_password.data):
+            if not user.check_password(pw_form.new_password.data):
+                user.set_password(pw_form.new_password.data)
+                db.session.commit()
+                flash('Successfully Reset Password.')
+                return redirect(url_for('account'))
+    
+    #deletes every row from models.py tables that belongs to the current user
+    delete_form = DeleteForm()
+    if delete_form.validate_on_submit() and request.method == "POST":
+        user = current_user
+        if user.check_password(delete_form.password.data):
+            deleteTasks = Task.query.filter_by(user=current_user).all()
+            for task in deleteTasks:
+                db.session.delete(task)
+                db.session.commit()
+
+            b = Profile.query.filter_by(user_id=current_user.id).first()
+            if b:
+                db.session.delete(b)
+                db.session.commit()
+
+            db.session.delete(user)
+            db.session.commit()
+            logout_user
+            flash('Successfully Deleted Account.')
+            return redirect(url_for('login'))
+        else:
+            flash('Incorrect Password!')
+    return render_template('account.html', bform=bio_form, pform=pw_form, user=current_user, dform=delete_form)
+
+@myapp.route('/delete-bio/<int:id>', methods=['GET','POST'])
+@login_required
+def delete_bio(id):
+    b = Profile.query.filter(Profile.user_id == id).first()
+    if b:
+        db.session.delete(b) 
+        db.session.commit()
+        flash('Successfully Deleted Bio')
+    else:
+        flash('There is no bio to be deleted.')
+    return redirect(url_for('account'))
+
+
+@myapp.route('/data_preprocessing', methods=['GET', 'POST'])
+@login_required
+def convert_to_dataframe():
+    # Query all tasks:
+    tasks = Task.query.filter(Task.user_id==current_user.id).all()
+    
+    # Extract each task from SQLAlchemy "Task" objects
+    data_of_task = [{
+        'id': task.id,
+        'title': task.title,
+        'description': task.description,
+        'priority': task.priority,
+        'due_date': task.due_date,
+        'due_time': task.due_time,
+        'is_completed': task.is_completed
+    } for task in tasks]
+    
+    # Create the DataFrame based on a list of dictionaries: data_of_tasks
+    df = pd.DataFrame(data_of_task)
+    
+    # For testing DataFrame
+    print("Before:\n")
+    print(df)
+
+    # Fill missing values 
+    df['description'] = df['description'].fillna("No description provided")
+    #df['priority'] = df['priority'].fillna(df['priority'].mode()[0])  # Fill with most frequent value
+    df['priority'] = df['priority'].fillna('1')
+    
+    # Ensure 'due_date' is in datetime format and fill missing dates 
+    df['due_date'] = pd.to_datetime(df['due_date'], errors='coerce') 
+    df['due_date'].fillna(pd.to_datetime('2099-12-31'), inplace=True)
+
+    df['due_time'] = df['due_time'].fillna(pd.to_datetime('00:00:00').time())  # Placeholder for missing times
+
+    
+    # Display the DataFrame after filling missing values 
+    print("After:\n")
+    print(df)
+
+    # Label Encoding for priority 
+    label_encoder = LabelEncoder() 
+    df['priority'] = label_encoder.fit_transform(df['priority']) 
+    
+    # Extract year, month, day from 'due_date' 
+    df['due_year'] = df['due_date'].dt.year 
+    df['due_month'] = df['due_date'].dt.month 
+    df['due_day'] = df['due_date'].dt.day 
+     
+    # Combine 'due_date' and 'due_time' to extract hour and minute 
+    df['due_time'] = df.apply(lambda x: pd.to_datetime(f"{x['due_date'].date()} {x['due_time']}"), axis=1) 
+    df['due_hour'] = df['due_time'].dt.hour 
+    df['due_minute'] = df['due_time'].dt.minute 
+    
+    # Calculate the number of days until the due date 
+    current_date = datetime.now() 
+    df['days_until_due'] = (df['due_date'] - current_date).dt.days 
+    
+    # Add a column for the day of the week 
+    df['due_weekday'] = df['due_date'].dt.dayofweek # Monday=0, Sunday=6 
+    
+    # Display the DataFrame after feature engineering 
+    print("\n")
+    print(df[['id', 'title', 'description', 'priority', 'due_date', 'due_time', 'due_year', 'due_month', 'due_day', 'due_hour', 'due_minute', 'days_until_due', 'due_weekday', 'is_completed']])
+
+    # Return the DataFrame as a JSON response
+    return "Done"

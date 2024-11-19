@@ -63,6 +63,12 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f'<User {self.id}: {self.email}>'
 
+class Profile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    bio = db.Column(db.String(200))
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
 # Set up the table Post with different columns in Database:
 class Post(db.Model):
     # Post ID:
