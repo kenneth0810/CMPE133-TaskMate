@@ -7,6 +7,7 @@
     <h1>Your Tasks</h1>
     <div class="task-input">
         <button type="button" class="btn btn-primary" id="openModalButton">Create Task</button>
+        <button type="button" class="btn btn-primary" id="openModalButton" href="{{url_for('predict')}}">Suggest Task</button>
     </div>
 
     {% if not tasks %}
@@ -286,6 +287,7 @@
     function reset() {
         document.getElementById("et").value = "0";
         document.getElementById("submit").value = "Create Task";
+        document.getElementById("submit").value = "Suggest Task";
         document.getElementById("title").value = "";
         document.getElementById("description").value = "";
         document.getElementById("priority").value = "";

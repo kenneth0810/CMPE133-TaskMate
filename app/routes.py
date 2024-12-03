@@ -1,6 +1,7 @@
 from app import myapp, db, login
-from app.forms import LoginForm, RegistrationForm, TaskForm, BioForm, PasswordForm, DeleteForm
+from app.forms import LoginForm, RegistrationForm, TaskForm, BioForm, PasswordForm, DeleteForm, SuggestTaskForm
 from app.models import User, Task, Profile
+#from app.preprocessing_data import preprocess_data
 from flask import jsonify, render_template
 from flask import redirect, request, session, url_for
 from flask import flash, get_flashed_messages
@@ -8,13 +9,15 @@ from flask_login import current_user
 from flask_login import login_user
 from flask_login import logout_user
 from flask_login import login_required
-import pandas as pd
+#import pandas as pd
 from datetime import datetime
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.preprocessing import LabelEncoder
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
+#from sklearn.feature_extraction.text import TfidfVectorizer
+#from sklearn.preprocessing import LabelEncoder
+#from sklearn.preprocessing import MinMaxScaler
+#from sklearn.metrics.pairwise import cosine_similarity
+#from nltk.corpus import stopwords
+#from nltk.stem import PorterStemmer
+#import numpy as np
 
 # landing page
 @login.user_loader
@@ -193,7 +196,26 @@ def delete_bio(id):
     return redirect(url_for('account'))
 
 
-@myapp.route('/data_preprocessing', methods=['GET', 'POST'])
+@myapp.route('/predict', methods=['GET', 'POST'])
+def predict():
+    tasks = Task.query.all()
+
+    # Count task frequencies
+    task_counts = {}
+    for task in tasks:
+        task_counts[task.title] = task_counts.get(task.title, 0) + 1
+
+    # Sort tasks by frequency and select top 5
+    top_n_tasks = sorted(task_counts.items(), key=lambda x: -x[1])[:5]
+
+    # Create a list of dictionaries for common tasks
+    common_tasks = [{'title': task[0], 'description': ''} for task in top_n_tasks]
+
+    # Pass suggested tasks to the template for rendering
+    return render_template('predict.html', common_tasks=common_tasks)
+
+
+"""@myapp.route('/predic', methods=['GET', 'POST'])
 @login_required
 def convert_to_dataframe():
     # Query all tasks:
@@ -213,55 +235,7 @@ def convert_to_dataframe():
     # Create the DataFrame based on a list of dictionaries: data_of_tasks
     df = pd.DataFrame(data_of_task)
     
-    # For testing DataFrame
-    print("Before:\n")
-    print(df)
 
-    # Fill missing values 
-    df['description'] = df['description'].fillna("No description provided")
-    #df['priority'] = df['priority'].fillna(df['priority'].mode()[0])  # Fill with most frequent value
-    df['priority'] = df['priority'].fillna('1')
-    
-    # Ensure 'due_date' is in datetime format and fill missing dates 
-    df['due_date'] = pd.to_datetime(df['due_date'], errors='coerce') 
-    df['due_date'].fillna(pd.to_datetime('2099-12-31'), inplace=True)
-
-    df['due_time'] = df['due_time'].fillna(pd.to_datetime('00:00:00').time())  # Placeholder for missing times
-
-    
-    # Display the DataFrame after filling missing values 
-    print("After:\n")
-    print(df)
-
-    # Label Encoding for priority 
-    label_encoder = LabelEncoder() 
-    df['priority'] = label_encoder.fit_transform(df['priority']) 
-    
-    # Extract year, month, day from 'due_date' 
-    df['due_year'] = df['due_date'].dt.year 
-    df['due_month'] = df['due_date'].dt.month 
-    df['due_day'] = df['due_date'].dt.day 
-     
-    # Combine 'due_date' and 'due_time' to extract hour and minute 
-    df['due_time'] = df.apply(lambda x: pd.to_datetime(f"{x['due_date'].date()} {x['due_time']}"), axis=1) 
-    df['due_hour'] = df['due_time'].dt.hour 
-    df['due_minute'] = df['due_time'].dt.minute 
-    
-    # Calculate the number of days until the due date 
-    current_date = datetime.now() 
-    df['days_until_due'] = (df['due_date'] - current_date).dt.days 
-    
-    # Add a column for the day of the week 
-    df['due_weekday'] = df['due_date'].dt.dayofweek # Monday=0, Sunday=6 
-    
-    # Display the DataFrame after feature engineering 
-    print("\n")
-    print(df[['id', 'title', 'description', 'priority', 'due_date', 'due_time', 'due_year', 'due_month', 'due_day', 'due_hour', 'due_minute', 'days_until_due', 'due_weekday', 'is_completed']])
-    
-    # Vectorize task descriptions using TF-IDF
-    tfidf_vectorizer = TfidfVectorizer()
-    tfidf_matrix = tfidf_vectorizer.fit_transform(df['description'])
-    print(tfidf_matrix)
 
     # Normalize numerical features
     scaler = MinMaxScaler()
@@ -278,3 +252,4 @@ def convert_to_dataframe():
 
     # Return the DataFrame as a JSON response
     return features
+"""
