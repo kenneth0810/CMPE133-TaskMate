@@ -32,6 +32,10 @@ svg {
     color: #666;
 }
 
+.task-filter label {
+    padding: 0 2%;
+}
+
 /* Task Header Styling */
 .all-tasks .header {
     display: grid;
