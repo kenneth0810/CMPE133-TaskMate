@@ -91,14 +91,15 @@ def tasks():
             db.session.add(task)
             db.session.commit()
             flash('Successfully created new task.')
-            tasks = Task.query.filter(Task.user_id==current_user.id).filter(Task.is_completed==False).all()
+            tasks = Task.query.filter(Task.user_id==current_user.id).all()
             return redirect(url_for('tasks'))
         else:
             findTask = Task.query.filter_by(id=edit_task_id).first()
             form.populate_obj(findTask)
             db.session.commit()
-    tasks = Task.query.filter(Task.user_id==current_user.id).filter(Task.is_completed==False).all()
+    tasks = Task.query.filter(Task.user_id==current_user.id).all()
     return render_template('tasks.html', form=form, tasks=tasks)
+
 
 @myapp.route('/delete_task/<task_id>', methods=['DELETE'])
 def delete_task(task_id):
