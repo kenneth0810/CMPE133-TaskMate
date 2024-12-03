@@ -12,7 +12,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv()
 
 myapp.config.from_mapping(
-    SECRET_KEY = 'TaskMate',
+    SECRET_KEY = os.getenv('SECRET_KEY'),
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db'),
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 )
