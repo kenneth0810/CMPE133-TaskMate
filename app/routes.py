@@ -9,8 +9,12 @@ from flask_login import login_user
 from flask_login import logout_user
 from flask_login import login_required
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
 from datetime import datetime
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 
 # landing page
 @login.user_loader
@@ -252,6 +256,24 @@ def convert_to_dataframe():
     # Display the DataFrame after feature engineering 
     print("\n")
     print(df[['id', 'title', 'description', 'priority', 'due_date', 'due_time', 'due_year', 'due_month', 'due_day', 'due_hour', 'due_minute', 'days_until_due', 'due_weekday', 'is_completed']])
+    
+    # Vectorize task descriptions using TF-IDF
+    tfidf_vectorizer = TfidfVectorizer()
+    tfidf_matrix = tfidf_vectorizer.fit_transform(df['description'])
+    print(tfidf_matrix)
+
+    # Normalize numerical features
+    scaler = MinMaxScaler()
+    priority_scaled = scaler.fit_transform(df[['priority']].astype(float))
+    due_date_scaled = scaler.fit_transform(df[['due_date']].astype(int).values.reshape(-1, 1))
+
+    # Combine all features into a single matrix
+    features = np.hstack([tfidf_matrix.toarray(), priority_scaled, due_date_scaled])
+    print("Feature Matrix Shape:", features.shape)
+
+    # Compute cosine similarity matrix
+    cosine_sim = cosine_similarity(features, features)
+    print("Cosine Similarity Matrix Shape:", cosine_sim.shape)
 
     # Return the DataFrame as a JSON response
-    return "Done"
+    return features
