@@ -41,6 +41,20 @@ class TaskForm(FlaskForm):
     is_completed = BooleanField('Complete Task', default=False)
     submit = SubmitField('Create Task')
 
+class SuggestTaskForm(FlaskForm):
+    title = StringField('Suggest Task Title', validators=[DataRequired()])
+    description = TextAreaField('Suggest Task Description', default=None)
+    priority = SelectField('Priority', choices=[
+        ('', 'None'),
+        (1, 'Low'),
+        (2, 'Medium'),
+        (3, 'High')
+    ], default=None)
+    due_date = DateField('Due Date', default=None, validators=[Optional()])
+    due_time = TimeField('Due Time', default=None, validators=[Optional()])
+    is_completed = BooleanField('Complete Task', default=False)
+    submit = SubmitField('Suggest Task')
+
 class BioForm(FlaskForm):
     bio = StringField("Bio:", 
                       validators = [DataRequired(), Length(max = 100)], 
