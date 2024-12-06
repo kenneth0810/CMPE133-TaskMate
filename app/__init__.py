@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_migrate import Migrate
 from dotenv import load_dotenv
 import os
 
@@ -20,6 +21,8 @@ db = SQLAlchemy(myapp)
 
 with myapp.app_context():
     db.create_all()
+
+migrate = Migrate(myapp, db)
 
 login = LoginManager(myapp)
 login.init_app(myapp)
