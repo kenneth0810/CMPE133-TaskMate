@@ -27,7 +27,10 @@ def load_user(id):
 # landing page 
 @myapp.route('/')
 def index():
-    return render_template('index.html')
+    if current_user.is_authenticated():
+        return render_template('index.html')
+    else:
+        return render_template('login.html')
 
 
 @myapp.route('/register', methods=['GET', 'POST'])
