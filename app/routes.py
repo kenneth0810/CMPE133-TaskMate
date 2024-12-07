@@ -27,11 +27,18 @@ def load_user(id):
 # landing page 
 @myapp.route('/')
 def index():
-    return render_template('index.html')
+    if current_user.is_authenticated:
+        return render_template('index.html')
+    else:
+        return redirect(url_for('login'))
 
 
 @myapp.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        flash('An Account Is Already Logged In')
+        print("Current User:", current_user)
+        return redirect(url_for('index')) 
     form = RegistrationForm()
     if form.validate_on_submit():
         if User.query.filter_by(email=form.email.data).first():
