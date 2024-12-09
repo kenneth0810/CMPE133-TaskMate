@@ -213,7 +213,8 @@ def account():
             db.session.commit()
             logout_user
             flash('Successfully Deleted Account.')
-            return redirect(url_for('login'))
+            return redirect(url_for('register')) 
+            # user will get redirected to registration page when an account is deleted
         else:
             flash('Incorrect Password!')
     return render_template('account.html', bform=bio_form, pform=pw_form, user=current_user, dform=delete_form)
