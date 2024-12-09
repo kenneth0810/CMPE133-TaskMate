@@ -32,7 +32,6 @@ def index():
     else:
         return redirect(url_for('login'))
 
-
 @myapp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -61,7 +60,7 @@ def login():
     if current_user.is_authenticated:
         flash('An Account Is Already Logged In')
         print("Current User:", current_user)
-        return redirect(url_for('index')) 
+        return redirect(url_for('tasks')) 
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -74,7 +73,7 @@ def login():
                 if next_page:
                     return redirect(next_page)
                 else:
-                    return redirect(url_for('index'))
+                    return redirect(url_for('tasks'))
             else:
                 flash("Incorrect Password", 'danger')
         else:
@@ -108,7 +107,32 @@ def tasks():
             form.populate_obj(findTask)
             db.session.commit()
     tasks = Task.query.filter(Task.user_id==current_user.id).all()
-    return render_template('tasks.html', form=form, tasks=tasks)
+    for t in tasks:
+        if (t.due_date):
+            t.due_date = t.due_date.strftime("%m/%d/%Y")
+        if (t.due_time):
+            t.due_time = t.due_time.strftime("%I:%M %p")
+    form.process()
+
+    # Count task frequencies
+    task_counts = {}
+    for task in tasks:
+        if task.title not in task_counts:
+            task_counts[task.title] = {'count': 0, 'task_obj': task}
+        task_counts[task.title]['count'] += 1
+        # task_counts[task.title]['task_obj'] = task
+    print(task_counts)
+
+    # Sort tasks by frequency and select top 5
+    top_n_tasks = sorted(task_counts.items(), key=lambda x: x[1]['count'], reverse=True)[:5]
+    print(top_n_tasks)
+
+    # Create a list of dictionaries for common tasks
+    # common_tasks = [{'title': task[0], 'id': task[1]['id'], 'description': task[1]['description']} for task in top_n_tasks]
+    common_tasks = [task[1]['task_obj'] for task in top_n_tasks]
+    print(common_tasks)
+
+    return render_template('tasks.html', form=form, tasks=tasks, common_tasks=common_tasks)
 
 
 @myapp.route('/delete_task/<task_id>', methods=['DELETE'])
@@ -122,6 +146,10 @@ def delete_task(task_id):
 def edit_task(task_id):
     task = Task.query.filter_by(id=task_id).first()
     task_dict = {key: value for key, value in task.__dict__.items() if not key.startswith('_')}
+    if task_dict['due_date']:
+        task_dict['due_date'] = task_dict['due_date'].strftime("%Y-%m-%d")
+    if task_dict['due_time']:
+        task_dict['due_time'] = task_dict['due_time'].strftime("%H:%M")
     return jsonify({'success': True, 'message': f'Task {task_id} details retrieved.', 'task': task_dict})
 
 @myapp.route('/complete_task/<task_id>', methods=['PATCH'])
