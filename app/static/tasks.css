@@ -30,6 +30,8 @@ svg {
 .no-tasks {
     font-size: 1.2em;
     color: #666;
+    padding: 10px;
+    margin-top: 15px;
 }
 
 .task-filter label {
@@ -37,7 +39,7 @@ svg {
 }
 
 /* Task Header Styling */
-.all-tasks .header {
+.all-tasks .header, .common-tasks .header {
     display: grid;
     grid-template-columns: 1fr 3fr 5fr 3fr 3fr 2fr;
     padding: 10px;
@@ -49,7 +51,7 @@ svg {
 }
 
 /* Task List Styling */
-.all-tasks {
+.all-tasks, .common-tasks {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -89,6 +91,7 @@ svg {
 .complete { fill: #28a745; } /* Green for complete */
 .delete { fill: #dc3545; }   /* Red for delete */
 .edit { fill: #ffc107; }     /* Yellow for edit */
+.choose { fill: #ff5128; }     /* Yellow for edit */
 
 /* Task Details Styling */
 .title {
@@ -232,22 +235,12 @@ svg {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-
 .common-tasks h3 {
     margin-bottom: 10px;
     color: #ffffff; 
     font-size: 1.5em;
     font-weight: bold;
 }
-
-.common-tasks .task {
-    background-color: #ffffff;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 10px;
-}
-
 .common-tasks .task:hover {
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 12px rgba(255, 255, 255, 0.15);
 }

@@ -9,6 +9,7 @@ from flask_login import current_user
 from flask_login import login_user
 from flask_login import logout_user
 from flask_login import login_required
+from sqlalchemy import desc
 #import pandas as pd
 from datetime import datetime
 #from sklearn.feature_extraction.text import TfidfVectorizer
@@ -28,7 +29,7 @@ def load_user(id):
 @myapp.route('/')
 def index():
     if current_user.is_authenticated:
-        return render_template('index.html')
+        return redirect(url_for('tasks'))
     else:
         return redirect(url_for('login'))
 
@@ -106,7 +107,7 @@ def tasks():
             findTask = Task.query.filter_by(id=edit_task_id).first()
             form.populate_obj(findTask)
             db.session.commit()
-    tasks = Task.query.filter(Task.user_id==current_user.id).all()
+    tasks = Task.query.filter(Task.user_id==current_user.id).order_by(desc(Task.priority)).all()
     for t in tasks:
         if (t.due_date):
             t.due_date = t.due_date.strftime("%m/%d/%Y")
@@ -116,11 +117,13 @@ def tasks():
 
     # Count task frequencies
     task_counts = {}
+    num_incomplete = 0
     for task in tasks:
         if task.title not in task_counts:
             task_counts[task.title] = {'count': 0, 'task_obj': task}
         task_counts[task.title]['count'] += 1
-        # task_counts[task.title]['task_obj'] = task
+        if task.is_completed == False:
+            num_incomplete += 1
     print(task_counts)
 
     # Sort tasks by frequency and select top 5
@@ -132,7 +135,8 @@ def tasks():
     common_tasks = [task[1]['task_obj'] for task in top_n_tasks]
     print(common_tasks)
 
-    return render_template('tasks.html', form=form, tasks=tasks, common_tasks=common_tasks)
+    print(num_incomplete)
+    return render_template('tasks.html', form=form, tasks=tasks, common_tasks=common_tasks, num_incomplete=num_incomplete)
 
 
 @myapp.route('/delete_task/<task_id>', methods=['DELETE'])
@@ -158,6 +162,13 @@ def complete_task(task_id):
     task.is_completed = True
     db.session.commit()
     return jsonify({'success': True, 'message': f'Task {task_id} successfully marked as complete.'})
+
+@myapp.route('/recover_task/<task_id>', methods=['PATCH'])
+def recover_task(task_id):
+    task = Task.query.filter_by(id=task_id).first()
+    task.is_completed = False
+    db.session.commit()
+    return jsonify({'success': True, 'message': f'Task {task_id} successfully marked as incomplete.'})
 
 print("URL Map", myapp.url_map)
 
@@ -185,7 +196,7 @@ def account():
             bio_form.bio.data = curr_bio.bio
     
     pw_form = PasswordForm()
-    if pw_form.validate_on_submit() and request.method == "POST":
+    if (pw_form.old_password.data != None or pw_form.new_password.data != None or pw_form.confirm.data != None) and pw_form.validate_on_submit() and request.method == "POST":
         user = current_user
         if user.check_password(pw_form.old_password.data):
             if not user.check_password(pw_form.new_password.data):
@@ -196,7 +207,7 @@ def account():
     
     #deletes every row from models.py tables that belongs to the current user
     delete_form = DeleteForm()
-    if delete_form.validate_on_submit() and request.method == "POST":
+    if delete_form.password.data != None and delete_form.validate_on_submit() and request.method == "POST":
         user = current_user
         if user.check_password(delete_form.password.data):
             deleteTasks = Task.query.filter_by(user=current_user).all()
@@ -232,23 +243,23 @@ def delete_bio(id):
     return redirect(url_for('account'))
 
 
-@myapp.route('/predict', methods=['GET', 'POST'])
-def predict():
-    tasks = Task.query.all()
+# @myapp.route('/predict', methods=['GET', 'POST'])
+# def predict():
+#     tasks = Task.query.all()
 
-    # Count task frequencies
-    task_counts = {}
-    for task in tasks:
-        task_counts[task.title] = task_counts.get(task.title, 0) + 1
+#     # Count task frequencies
+#     task_counts = {}
+#     for task in tasks:
+#         task_counts[task.title] = task_counts.get(task.title, 0) + 1
 
-    # Sort tasks by frequency and select top 5
-    top_n_tasks = sorted(task_counts.items(), key=lambda x: -x[1])[:5]
+#     # Sort tasks by frequency and select top 5
+#     top_n_tasks = sorted(task_counts.items(), key=lambda x: -x[1])[:5]
 
-    # Create a list of dictionaries for common tasks
-    common_tasks = [{'title': task[0], 'description': ''} for task in top_n_tasks]
+#     # Create a list of dictionaries for common tasks
+#     common_tasks = [{'title': task[0], 'description': ''} for task in top_n_tasks]
 
-    # Pass suggested tasks to the template for rendering
-    return render_template('predict.html', common_tasks=common_tasks)
+#     # Pass suggested tasks to the template for rendering
+#     return render_template('predict.html', common_tasks=common_tasks)
 
 
 """@myapp.route('/predic', methods=['GET', 'POST'])
