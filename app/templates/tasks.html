@@ -18,19 +18,13 @@
                 <input type="radio" name="filter" value="incomplete" checked
                        {% if filter_by == 'incomplete' %}checked{% endif %}
                        onchange="filterTasks()">
-                Incomplete
+                In Progress
             </label>
             <label>
                 <input type="radio" name="filter" value="completed"
                        {% if filter_by == 'completed' %}checked{% endif %}
                        onchange="filterTasks()">
                 Completed
-            </label>
-            <label>
-                <input type="radio" name="filter" value="all"
-                       {% if filter_by == 'all' %}checked{% endif %}
-                       onchange="filterTasks()">
-                All Tasks
             </label>
         </form>
     </div>
@@ -221,10 +215,7 @@
         tasks.forEach(task => {
             const taskStatus = task.getAttribute('data-status');
             
-            if (selectedFilter === 'all') {
-                task.style.display = 'grid'; // Show all tasks
-            } 
-            else if (selectedFilter === 'incomplete' && taskStatus === 'incomplete') {
+            if (selectedFilter === 'incomplete' && taskStatus === 'incomplete') {
                 task.style.display = 'grid'; // Show incomplete tasks
             } 
             else if (selectedFilter === 'completed' && taskStatus === 'completed') {
