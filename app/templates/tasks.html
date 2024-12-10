@@ -9,22 +9,13 @@
         <button type="button" class="btn btn-primary" id="openModalButton">Create Task</button>
     </div>
 
-    {% if not tasks %}
-    <p class="no-tasks">You have no tasks.</p>
-    {% else %}
     <div class="task-filter">
         <form method="get" action="{{ url_for('tasks') }}">
             <label>
                 <input type="radio" name="filter" value="incomplete" checked
                        {% if filter_by == 'incomplete' %}checked{% endif %}
                        onchange="filterTasks()">
-                Incomplete
-            </label>
-            <label>
-                <input type="radio" name="filter" value="completed"
-                       {% if filter_by == 'completed' %}checked{% endif %}
-                       onchange="filterTasks()">
-                Completed
+                In Progess
             </label>
             <label>
                 <input type="radio" name="filter" value="all"
@@ -34,7 +25,120 @@
             </label>
         </form>
     </div>
+    {% if not tasks %}
+    <p class="no-tasks">You have no tasks</p>
+
+    {% else %}
     <div class="all-tasks">
+        <p class="no-tasks" id="nip" style = "display: inline;">You have no tasks In Progress</p>
+        {% if true %}
+        <div class="header" id="main-header" style="display: none;">
+            <span class="actions-header actions">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#e8eaed">
+                    <path
+                        d="M240-160q-33 0-56.5-23.5T160-240q0-33 23.5-56.5T240-320q33 0 56.5 23.5T320-240q0 33-23.5 56.5T240-160Zm240 0q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm240 0q-33 0-56.5-23.5T640-240q0-33 23.5-56.5T720-320q33 0 56.5 23.5T800-240q0 33-23.5 56.5T720-160ZM240-400q-33 0-56.5-23.5T160-480q0-33 23.5-56.5T240-560q33 0 56.5 23.5T320-480q0 33-23.5 56.5T240-400Zm240 0q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm240 0q-33 0-56.5-23.5T640-480q0-33 23.5-56.5T720-560q33 0 56.5 23.5T800-480q0 33-23.5 56.5T720-400ZM240-640q-33 0-56.5-23.5T160-720q0-33 23.5-56.5T240-800q33 0 56.5 23.5T320-720q0 33-23.5 56.5T240-640Zm240 0q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Zm240 0q-33 0-56.5-23.5T640-720q0-33 23.5-56.5T720-800q33 0 56.5 23.5T800-720q0 33-23.5 56.5T720-640Z" />
+                </svg>
+                Actions
+            </span>
+            <span class="title">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#e8eaed">
+                    <path
+                        d="M222-200 80-342l56-56 85 85 170-170 56 57-225 226Zm0-320L80-662l56-56 85 85 170-170 56 57-225 226Zm298 240v-80h360v80H520Zm0-320v-80h360v80H520Z" />
+                </svg>
+                Task
+            </span>
+            <span class="description">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#e8eaed">
+                    <path
+                        d="M320-240h320v-80H320v80Zm0-160h320v-80H320v80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z" />
+                </svg>
+                Summary
+            </span>
+            <span class="due-date">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#e8eaed">
+                    <path
+                        d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-160 0q-17 0-28.5-11.5T280-440q0-17 11.5-28.5T320-480q17 0 28.5 11.5T360-440q0 17-11.5 28.5T320-400Zm320 0q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-160 0q-17 0-28.5-11.5T280-280q0-17 11.5-28.5T320-320q17 0 28.5 11.5T360-280q0 17-11.5 28.5T320-240Zm320 0q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z" />
+                </svg>
+                Due Date
+            </span>
+            <span class="due-time">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#e8eaed">
+                    <path
+                        d="m612-292 56-56-148-148v-184h-80v216l172 172ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-400Zm0 320q133 0 226.5-93.5T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 133 93.5 226.5T480-160Z" />
+                </svg>
+                Due Time
+            </span>
+            <span class="priority">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#e8eaed">
+                    <path
+                        d="M480-280q17 0 28.5-11.5T520-320q0-17-11.5-28.5T480-360q-17 0-28.5 11.5T440-320q0 17 11.5 28.5T480-280Zm-40-160h80v-240h-80v240ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h168q13-36 43.5-58t68.5-22q38 0 68.5 22t43.5 58h168q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm280-590q13 0 21.5-8.5T510-820q0-13-8.5-21.5T480-850q-13 0-21.5 8.5T450-820q0 13 8.5 21.5T480-790ZM200-200v-560 560Z" />
+                </svg>
+                Priority
+            </span>
+        </div>
+        {% endif %}
+        {% for task in tasks %}
+        <div class="task" id={{task.id}} data-status="{{ 'completed' if task.is_completed else 'incomplete' }}" {%if task.is_completed%} style="text-decoration: line-through;" {%endif%}>
+            <span class="actions">
+            {% if not task.is_completed %}
+                <a href="{{ url_for('complete_task', task_id=task.id) }}" class="complete"><svg class="complete"
+                        xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="#e8eaed">
+                        <path
+                            d="m424-312 282-282-56-56-226 226-114-114-56 56 170 170ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z" />
+                </svg></a>
+                <a href="{{ url_for('edit_task', task_id=task.id) }}" class="edit"><svg class="edit"
+                    xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#e8eaed">
+                    <path
+                    d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
+                </svg></a>
+            {% else %}
+                <a href="{{ url_for('recover_task', task_id=task.id) }}" class="recover"><svg class="recover"
+                    xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#e8eaed">
+                    <path
+                        d="m424-312 282-282-56-56-226 226-114-114-56 56 170 170ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z" />
+                </svg></a>
+            {% endif %}
+                <a href="{{ url_for('delete_task', task_id=task.id) }}" class="delete"><svg class="delete"
+                        xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="#e8eaed">
+                        <path
+                            d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
+                </svg></a>
+            </span>
+            <span class="title" value={{task.title}}>{{ task.title }}</span>
+            <span class="description" value={{task.description}}>{{ task.description }}</span>
+            <span class="due-date" value={{task.due_date}}>{{ task.due_date }}</span>
+            <span class="due-time" value={{task.due_time}}>{{ task.due_time }}</span>
+            <span class="priority" value={{task.priority}}>
+                {% if task.priority == "1" %}
+                Low
+                {% elif task.priority == "2" %}
+                Medium
+                {% elif task.priority == "3" %}
+                High
+                {% else %}
+                None
+                {% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="common-tasks">
+        <h3>Common Tasks</h3>
+        {% if common_tasks|length <= 0 %}
+        <p style="color:white;">No Common Tasks Detected Yet</p>
+        {% else %}
         <div class="header">
             <span class="actions-header actions">
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
@@ -85,28 +189,14 @@
                 Priority
             </span>
         </div>
-        {% for task in tasks %}
-        <div class="task" id={{task.id}} data-status="{{ 'completed' if task.is_completed else 'incomplete' }}" {%if task.is_completed%} style="text-decoration: line-through;" {%endif%}>
+        {% for task in common_tasks %}
+        <div class="task" id={{task.id}} data-status="common">
             <span class="actions">
-            {% if not task.is_completed %}
-                <a href="{{ url_for('complete_task', task_id=task.id) }}" class="complete"><svg class="complete"
+                <a class="choose"><svg class="choose" onclick="choose()"
                         xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
                         fill="#e8eaed">
                         <path
                             d="m424-312 282-282-56-56-226 226-114-114-56 56 170 170ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z" />
-                </svg></a>
-                <a href="{{ url_for('edit_task', task_id=task.id) }}" class="edit"><svg class="edit"
-                    xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
-                    fill="#e8eaed">
-                    <path
-                    d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
-                </svg></a>
-            {% endif %}
-                <a href="{{ url_for('delete_task', task_id=task.id) }}" class="delete"><svg class="delete"
-                        xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
-                        fill="#e8eaed">
-                        <path
-                            d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
                 </svg></a>
             </span>
             <span class="title" value={{task.title}}>{{ task.title }}</span>
@@ -126,37 +216,8 @@
             </span>
         </div>
         {% endfor %}
+        {% endif %}
     </div>
-    {% endif %}
-
-    <h3>Common Tasks</h3>
-    {% for task in common_tasks %}
-    <div class="task" id={{task.id}} data-status="{{ 'completed' if task.is_completed else 'incomplete' }}" {%if task.is_completed%} style="text-decoration: line-through;" {%endif%}>
-        <span class="actions">
-            <a class="choose"><svg class="choose" onclick="choose()"
-                    xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
-                    fill="#e8eaed">
-                    <path
-                        d="m424-312 282-282-56-56-226 226-114-114-56 56 170 170ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z" />
-            </svg></a>
-        </span>
-        <span class="title" value={{task.title}}>{{ task.title }}</span>
-        <span class="description" value={{task.description}}>{{ task.description }}</span>
-        <span class="due-date" value={{task.due_date}}>{{ task.due_date }}</span>
-        <span class="due-time" value={{task.due_time}}>{{ task.due_time }}</span>
-        <span class="priority" value={{task.priority}}>
-            {% if task.priority == "1" %}
-            Low
-            {% elif task.priority == "2" %}
-            Medium
-            {% elif task.priority == "3" %}
-            High
-            {% else %}
-            None
-            {% endif %}
-        </span>
-    </div>
-    {% endfor %}
 </div>
 
 <!-- Bootstrap Modal -->
@@ -194,7 +255,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                            onclick="document.getElementById('et').value = '0';document.getElementById('submit').value = 'Create Task';document.getElementById('form').reset();">Cancel</button>
+                            onclick="document.getElementById('et').value = '0';document.getElementById('taskModalLabel').innerHTML = 'Add Task Details';document.getElementById('submit').value = 'Create Task';document.getElementById('form').reset();">Cancel</button>
                         {{ form.submit(class="btn btn-primary", id = "submit") }}
                     </div>
                 </form>
@@ -213,21 +274,30 @@
     function filterTasks() {
         const selectedFilter = document.querySelector('input[name="filter"]:checked').value;
         const tasks = document.querySelectorAll('.task');
+        num_incomplete = 0;
+        document.getElementById('main-header').style.display = 'none';
+        document.getElementById("nip").style.display = 'inline';
 
         tasks.forEach(task => {
             const taskStatus = task.getAttribute('data-status');
-            
-            if (selectedFilter === 'all') {
-                task.style.display = 'grid'; // Show all tasks
-            } 
-            else if (selectedFilter === 'incomplete' && taskStatus === 'incomplete') {
-                task.style.display = 'grid'; // Show incomplete tasks
-            } 
-            else if (selectedFilter === 'completed' && taskStatus === 'completed') {
-                task.style.display = 'grid'; // Show completed tasks
-            } 
+
+            task.style.display = 'none'; // Hide tasks that don't match the filter
+            if (taskStatus === 'common') {
+                task.style.display = 'grid';
+            }
             else {
-                task.style.display = 'none'; // Hide tasks that don't match the filter
+                if (selectedFilter === 'all') {
+                    task.style.display = 'grid';
+                    document.getElementById('main-header').style.display = 'grid';
+                    document.getElementById("nip").style.display = 'none';
+                }
+                else if (selectedFilter === 'incomplete') {
+                    if (taskStatus === 'incomplete') {
+                        task.style.display = 'grid'; // Show incomplete tasks
+                        document.getElementById('main-header').style.display = 'grid';
+                        document.getElementById("nip").style.display = 'none';
+                    }
+                }
             }
         });
     }
@@ -243,7 +313,7 @@
     document.querySelector('.all-tasks').addEventListener('click', function (event) {
         event.preventDefault();
 
-        if (event.target.closest('.delete') || event.target.closest('.edit') || event.target.closest('.complete')) {
+        if (event.target.closest('.delete') || event.target.closest('.edit') || event.target.closest('.complete') || event.target.closest('.recover')) {
             const taskElement = event.target.closest('.task');
             const taskId = taskElement.id;
 
@@ -264,6 +334,9 @@
                             if (data.success) {
                                 console.log(data.message);
                                 taskElement.remove();
+                                // document.getElementById(taskId).remove();
+                                // filterTasks();
+                                location.reload();
                             } else {
                                 console.error('Failed to delete the task.');
                             }
@@ -293,6 +366,7 @@
                             }
                         })
                         .catch(error => console.error('Error:', error));
+                    document.getElementById("taskModalLabel").innerHTML = "Edit Task Details"
                     document.getElementById("submit").value = "Edit Task"
                     var editModal = new bootstrap.Modal(document.getElementById('taskModal'));
                     editModal.show();
@@ -310,6 +384,22 @@
                                 location.reload();
                             } else {
                                 console.error('Failed to mark the task as complete.');
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                } else if (event.target.closest('.recover')) {
+                    console.log(`Recovering ${taskId}`);
+                    fetch(`/recover_task/${taskId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json', }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                console.log(data.message);
+                                location.reload();
+                            } else {
+                                console.error('Failed to mark the task as incomplete.');
                             }
                         })
                         .catch(error => console.error('Error:', error));
@@ -344,7 +434,7 @@
                 }
             })
             .catch(error => console.error('Error:', error));
-        document.getElementById("submit").value = "Edit Task"
+        document.getElementById("submit").value = "Add Task"
         var editModal = new bootstrap.Modal(document.getElementById('taskModal'));
         editModal.show();
     }
@@ -352,6 +442,7 @@
     function reset() {
         console.log("reset")
         document.getElementById("et").value = "0";
+        document.getElementById("taskModalLabel").innerHTML = "Add Task Details";
         document.getElementById("submit").value = "Create Task";
         document.getElementById('form').reset();
     }

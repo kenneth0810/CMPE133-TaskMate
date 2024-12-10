@@ -17,7 +17,7 @@ class RegistrationForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])
     email = EmailField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=32)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message='Passwords must match')])
     submit = SubmitField('Register')
 
@@ -66,7 +66,7 @@ class PasswordForm(FlaskForm):
                                  validators = [DataRequired()], 
                                  render_kw ={"placeholder":"Enter Original Password"})
     new_password = PasswordField("", 
-                                 validators=[DataRequired(), Length(min=4, max=10)], 
+                                 validators=[DataRequired(), Length(min=8, max=32)], 
                                  render_kw={"placeholder": "Enter a New Password"}) 
     confirm = PasswordField("", 
                             validators=[DataRequired()], 
