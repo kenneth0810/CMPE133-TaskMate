@@ -129,6 +129,7 @@
     </div>
     {% endif %}
 
+<div class="common-tasks">
     <h3>Common Tasks</h3>
     {% for task in common_tasks %}
     <div class="task" id={{task.id}} data-status="{{ 'completed' if task.is_completed else 'incomplete' }}" {%if task.is_completed%} style="text-decoration: line-through;" {%endif%}>
@@ -158,6 +159,9 @@
     </div>
     {% endfor %}
 </div>
+
+
+<!-- --------------------------------------- -->
 
 <!-- Bootstrap Modal -->
 <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true"
