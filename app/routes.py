@@ -1,5 +1,5 @@
 from app import myapp, db, login
-from app.forms import LoginForm, RegistrationForm, TaskForm, BioForm, PasswordForm, DeleteForm, SuggestTaskForm
+from app.forms import LoginForm, RegistrationForm, TaskForm, PasswordForm, DeleteForm # all forms are from app.forms and handle all the form submission validations
 from app.models import User, Task, Profile
 #from app.preprocessing_data import preprocess_data
 from flask import jsonify, render_template
@@ -23,10 +23,10 @@ from datetime import datetime
 # landing page
 @login.user_loader
 def load_user(id):
-    return User.query.get(int(id))
+    return User.query.get(int(id)) # used for login logic
 
 # landing page 
-@myapp.route('/')
+@myapp.route('/') # default route of websites but will redirect to other routes based on if a user is signed in or not
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('tasks'))
@@ -38,16 +38,16 @@ def register():
     if current_user.is_authenticated:
         flash('An Account Is Already Logged In')
         print("Current User:", current_user)
-        return redirect(url_for('index')) 
+        return redirect(url_for('index')) # registration page should not be accessible when a user is logged in
     form = RegistrationForm()
     if form.validate_on_submit():
-        if User.query.filter_by(email=form.email.data).first():
+        if User.query.filter_by(email=form.email.data).first(): # cannot use an email that is already associated with another account
             flash('This email is already registered. Please login or use another email.', 'danger')
         else:
-            user = User(first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data)
-            user.set_password(form.password.data)
-            db.session.add(user)
-            db.session.commit()
+            user = User(first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data) # create new user entry
+            user.set_password(form.password.data) # set password using a hashing function
+            db.session.add(user) # add to db
+            db.session.commit() # commit to db
 
             flash(f'Successfully registered account for {user.email}', 'success')
             login_user(user)
@@ -61,31 +61,31 @@ def login():
     if current_user.is_authenticated:
         flash('An Account Is Already Logged In')
         print("Current User:", current_user)
-        return redirect(url_for('tasks')) 
+        return redirect(url_for('tasks')) # login page should not be accessible when a user is logged in
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data).first() # find the user in the db
         if user != None:
-            if user.check_password(form.password.data):
-                login_user(user)
+            if user.check_password(form.password.data): # check hashed password with the stored hash
+                login_user(user) # login user from the session
                 flash('Logged in successfully!', 'success')
-                next_page = request.form.get('next')
+                next_page = request.form.get('next') # some pages require being logged in so this parameter keeps track of previous pages to redirect to after loggin in
                 if next_page:
-                    return redirect(next_page)
+                    return redirect(next_page) # redirect to a page other than the Tasks page
                 else:
-                    return redirect(url_for('tasks'))
+                    return redirect(url_for('tasks')) # redirect to Tasks by default
             else:
-                flash("Incorrect Password", 'danger')
+                flash("Incorrect Password", 'danger')  # user with email found but the password password is incorrect
         else:
-            flash("No record of account under the entered email", 'danger')
+            flash("No record of account under the entered email", 'danger') # inform that user account was not found for the email
 
     return render_template('login.html', form=form)
 
 @myapp.route('/logout')
 @login_required
 def logout():
-    logout_user()
+    logout_user() # logout user from the session
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
@@ -94,80 +94,77 @@ def logout():
 def tasks():
     form = TaskForm()
     if form.validate_on_submit():
-        edit_task_id = request.form.get('entry')
-        print(edit_task_id)
+        edit_task_id = request.form.get('entry') # adding task and editing task logic can be combined by keeping track of the id of the task to edit (set to 0 if it's add task)
         if edit_task_id == "0": # if edit_task_id isn't greater than 0, then it's a regular add task action
-            task = Task(user_id=current_user.id, title=form.title.data, description=form.description.data, priority=form.priority.data, due_date=form.due_date.data, due_time=form.due_time.data)
-            db.session.add(task)
-            db.session.commit()
+            # add new task
+            task = Task(user_id=current_user.id, title=form.title.data, description=form.description.data, priority=form.priority.data, due_date=form.due_date.data, due_time=form.due_time.data) # create new task entry with the form details
+            db.session.add(task) # add task to db
+            db.session.commit() # commit
             flash('Successfully created new task.')
-            tasks = Task.query.filter(Task.user_id==current_user.id).all()
             return redirect(url_for('tasks'))
         else:
-            findTask = Task.query.filter_by(id=edit_task_id).first()
-            form.populate_obj(findTask)
-            db.session.commit()
-    tasks = Task.query.filter(Task.user_id==current_user.id).order_by(desc(Task.priority)).all()
+            # edit task
+            findTask = Task.query.filter_by(id=edit_task_id).first() # find task with id
+            form.populate_obj(findTask) # edit the db with the edited task information
+            db.session.commit() # commit
+    tasks = Task.query.filter(Task.user_id==current_user.id).order_by(desc(Task.priority)).all() # list of all tasks ordered by priority first then by when each were added
     for t in tasks:
         if (t.due_date):
-            t.due_date = t.due_date.strftime("%m/%d/%Y")
+            t.due_date = t.due_date.strftime("%m/%d/%Y") # reformat date so that the frontend can read it
         if (t.due_time):
-            t.due_time = t.due_time.strftime("%I:%M %p")
-    form.process()
+            t.due_time = t.due_time.strftime("%I:%M %p") # reformat time so that the frontend can read it
+    form.process() # reset most of the form fields to blank once the new task has been added to the db
 
-    # Count task frequencies
+    # Count task frequencies based on how many times a task title repeats
     task_counts = {}
-    num_incomplete = 0
+    num_incomplete = 0 # keep track of # of tasks incomplete or in progress
     for task in tasks:
         if task.title not in task_counts:
             task_counts[task.title] = {'count': 0, 'task_obj': task}
-        task_counts[task.title]['count'] += 1
+        task_counts[task.title]['count'] += 1 # increment title count
         if task.is_completed == False:
-            num_incomplete += 1
-    print(task_counts)
+            num_incomplete += 1 # incremement incomplete count
 
     # Sort tasks by frequency and select top 5
-    top_n_tasks = sorted(task_counts.items(), key=lambda x: x[1]['count'], reverse=True)[:5]
+    top_n_tasks = sorted(task_counts.items(), key=lambda x: x[1]['count'], reverse=True)[:5] # Find the 5 most frequent titles
     print(top_n_tasks)
 
     # Create a list of dictionaries for common tasks
-    # common_tasks = [{'title': task[0], 'id': task[1]['id'], 'description': task[1]['description']} for task in top_n_tasks]
-    common_tasks = [task[1]['task_obj'] for task in top_n_tasks]
+    common_tasks = [task[1]['task_obj'] for task in top_n_tasks] # render a list of the Task entry objects with the 5 most frequent titles
     print(common_tasks)
 
-    print(num_incomplete)
     return render_template('tasks.html', form=form, tasks=tasks, common_tasks=common_tasks, num_incomplete=num_incomplete)
 
 
 @myapp.route('/delete_task/<task_id>', methods=['DELETE'])
 def delete_task(task_id):
-    task = Task.query.filter_by(id=task_id).first()
-    db.session.delete(task)
-    db.session.commit()
+    task = Task.query.filter_by(id=task_id).first() # find the task with the parameter id
+    db.session.delete(task) # delete the found task from the db
+    db.session.commit() # commit
     return jsonify({'success': True, 'message': f'Task {task_id} successfully deleted.'})
 
 @myapp.route('/edit_task/<task_id>', methods=['GET'])
 def edit_task(task_id):
-    task = Task.query.filter_by(id=task_id).first()
-    task_dict = {key: value for key, value in task.__dict__.items() if not key.startswith('_')}
+    task = Task.query.filter_by(id=task_id).first() # find the task with the parameter id
+    task_dict = {key: value for key, value in task.__dict__.items() if not key.startswith('_')} # render a dictionary of task entry details
     if task_dict['due_date']:
-        task_dict['due_date'] = task_dict['due_date'].strftime("%Y-%m-%d")
+        task_dict['due_date'] = task_dict['due_date'].strftime("%Y-%m-%d") # reformat date so that the frontend can read it
     if task_dict['due_time']:
-        task_dict['due_time'] = task_dict['due_time'].strftime("%H:%M")
+        task_dict['due_time'] = task_dict['due_time'].strftime("%H:%M") # reformat date so that the frontend can read it
     return jsonify({'success': True, 'message': f'Task {task_id} details retrieved.', 'task': task_dict})
 
 @myapp.route('/complete_task/<task_id>', methods=['PATCH'])
 def complete_task(task_id):
-    task = Task.query.filter_by(id=task_id).first()
-    task.is_completed = True
-    db.session.commit()
+    task = Task.query.filter_by(id=task_id).first() # find the task with the parameter id
+    task.is_completed = True # set the found task's is_completed field to true
+    db.session.commit() # commit
     return jsonify({'success': True, 'message': f'Task {task_id} successfully marked as complete.'})
 
 @myapp.route('/recover_task/<task_id>', methods=['PATCH'])
 def recover_task(task_id):
-    task = Task.query.filter_by(id=task_id).first()
-    task.is_completed = False
-    db.session.commit()
+    task = Task.query.filter_by(id=task_id).first() # find the task with the parameter id
+    task.is_completed = False # set the found task's is_complete field to false so that it will now be an incomplete or in progress task
+    db.session.commit() # commit
     return jsonify({'success': True, 'message': f'Task {task_id} successfully marked as incomplete.'})
 
 print("URL Map", myapp.url_map)
@@ -175,30 +172,10 @@ print("URL Map", myapp.url_map)
 @myapp.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
-    user_id = current_user.id
-    email = current_user.email
-    bio_form = BioForm()
-    if bio_form.validate_on_submit() and request.method == "POST":
-        #if a current bio exists and a new bio is submitted, delete the current bio and replace it with the new bio
-        curr_bio = Profile.query.filter_by(user_id=current_user.id).first()
-        if curr_bio:
-            db.session.delete(curr_bio)
-        new_bio = Profile(user_id=current_user.id, bio=bio_form.bio.data)
-        db.session.add(new_bio)
-        db.session.commit()
-        flash('Successfully Updated a nNew Bio.')
-        return redirect(url_for('account'))
-    else:
-        #if nothing is submitted, the bio form will be empty, so assign the form.bio to the current bio so that the bio will be visible in the profile
-        curr_bio = Profile.query.filter_by(user_id=current_user.id).first()
-
-        if curr_bio:
-            bio_form.bio.data = curr_bio.bio
-    
     pw_form = PasswordForm()
-    if (pw_form.old_password.data != None or pw_form.new_password.data != None or pw_form.confirm.data != None) and pw_form.validate_on_submit() and request.method == "POST":
+    if (pw_form.old_password.data != None or pw_form.new_password.data != None or pw_form.confirm.data != None) and pw_form.validate_on_submit() and request.method == "POST": # ignore form if the fields are all empty (when there is only a submission for deleting account) but validate otherwise
         user = current_user
-        if user.check_password(pw_form.old_password.data):
+        if user.check_password(pw_form.old_password.data): # check the hashed password with the stored hash from the db in order to proceed
             if not user.check_password(pw_form.new_password.data):
                 user.set_password(pw_form.new_password.data)
                 db.session.commit()
@@ -207,7 +184,7 @@ def account():
     
     #deletes every row from models.py tables that belongs to the current user
     delete_form = DeleteForm()
-    if delete_form.password.data != None and delete_form.validate_on_submit() and request.method == "POST":
+    if delete_form.password.data != None and delete_form.validate_on_submit() and request.method == "POST": # ignore form if the field is all empty (when there is onlt a submission for password change) but validate otherwise
         user = current_user
         if user.check_password(delete_form.password.data):
             deleteTasks = Task.query.filter_by(user=current_user).all()
@@ -228,39 +205,7 @@ def account():
             # user will get redirected to registration page when an account is deleted
         else:
             flash('Incorrect Password!')
-    return render_template('account.html', bform=bio_form, pform=pw_form, user=current_user, dform=delete_form)
-
-@myapp.route('/delete-bio/<int:id>', methods=['GET','POST'])
-@login_required
-def delete_bio(id):
-    b = Profile.query.filter(Profile.user_id == id).first()
-    if b:
-        db.session.delete(b) 
-        db.session.commit()
-        flash('Successfully Deleted Bio')
-    else:
-        flash('There is no bio to be deleted.')
-    return redirect(url_for('account'))
-
-
-# @myapp.route('/predict', methods=['GET', 'POST'])
-# def predict():
-#     tasks = Task.query.all()
-
-#     # Count task frequencies
-#     task_counts = {}
-#     for task in tasks:
-#         task_counts[task.title] = task_counts.get(task.title, 0) + 1
-
-#     # Sort tasks by frequency and select top 5
-#     top_n_tasks = sorted(task_counts.items(), key=lambda x: -x[1])[:5]
-
-#     # Create a list of dictionaries for common tasks
-#     common_tasks = [{'title': task[0], 'description': ''} for task in top_n_tasks]
-
-#     # Pass suggested tasks to the template for rendering
-#     return render_template('predict.html', common_tasks=common_tasks)
-
+    return render_template('account.html', pform=pw_form, user=current_user, dform=delete_form)
 
 """@myapp.route('/predic', methods=['GET', 'POST'])
 @login_required

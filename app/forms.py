@@ -8,7 +8,7 @@ from wtforms.widgets import TextArea
 from .models import User
 
 class LoginForm(FlaskForm):
-    email = EmailField('Email', validators=[DataRequired(), Email()])
+    email = EmailField('Email', validators=[DataRequired(), Email()]) # field must be email
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Login')
@@ -16,50 +16,30 @@ class LoginForm(FlaskForm):
 class RegistrationForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])
-    email = EmailField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=32)])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message='Passwords must match')])
+    email = EmailField('Email', validators=[DataRequired(), Email()]) # field must be email
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=32)]) # field must be between 8 and 32 characters
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message='Passwords must match')]) # field must match password field
     submit = SubmitField('Register')
 
     # Custom validation method for email uniqueness:
     def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
+        user = User.query.filter_by(email=email.data).first() # checks if a user exists under the specified email
         if user is not None:
-            raise ValidationError('Please use a different email address.')
+            raise ValidationError('Please use a different email address.') # if there is a user under the email, raise an error
 
 class TaskForm(FlaskForm):
-    title = StringField('Task Title', validators=[DataRequired()])
+    title = StringField('Task Title', validators=[DataRequired()]) # field is required for adding any task to the db
     description = TextAreaField('Task Description', default=None)
     priority = SelectField('Priority', choices=[
         ('', 'None'),
         (1, 'Low'),
         (2, 'Medium'),
         (3, 'High')
-    ], default=None)
-    due_date = DateField('Due Date', default=None, validators=[Optional()])
-    due_time = TimeField('Due Time', default=None, validators=[Optional()])
-    is_completed = BooleanField('Complete Task', default=False)
+    ], default=None) # There are four priorities of None, Low, Medium, and High
+    due_date = DateField('Due Date', default=None, validators=[Optional()]) # field is optional
+    due_time = TimeField('Due Time', default=None, validators=[Optional()]) # field is optional
+    is_completed = BooleanField('Complete Task', default=False) # keeps track of if the field is completed or not
     submit = SubmitField('Create Task')
-
-class SuggestTaskForm(FlaskForm):
-    title = StringField('Suggest Task Title', validators=[DataRequired()])
-    description = TextAreaField('Suggest Task Description', default=None)
-    priority = SelectField('Priority', choices=[
-        ('', 'None'),
-        (1, 'Low'),
-        (2, 'Medium'),
-        (3, 'High')
-    ], default=None)
-    due_date = DateField('Due Date', default=None, validators=[Optional()])
-    due_time = TimeField('Due Time', default=None, validators=[Optional()])
-    is_completed = BooleanField('Complete Task', default=False)
-    submit = SubmitField('Suggest Task')
-
-class BioForm(FlaskForm):
-    bio = StringField("Bio:", 
-                      validators = [DataRequired(), Length(max = 100)], 
-                      render_kw ={"placeholder":"(Max: 100 characters) Add Bio Here"})
-    submit = SubmitField("Save")
 
 class PasswordForm(FlaskForm):
     old_password = PasswordField("", 
@@ -67,26 +47,26 @@ class PasswordForm(FlaskForm):
                                  render_kw ={"placeholder":"Enter Original Password"})
     new_password = PasswordField("", 
                                  validators=[DataRequired(), Length(min=8, max=32)], 
-                                 render_kw={"placeholder": "Enter a New Password"}) 
+                                 render_kw={"placeholder": "Enter a New Password"}) # field must be between 8 and 32 characters
     confirm = PasswordField("", 
                             validators=[DataRequired()], 
                             render_kw={"placeholder": "Confirm New Password"})
     submit = SubmitField("Update")
 
-    def validate_old_password(self, form):
+    def validate_old_password(self, form): 
         if not check_password_hash(current_user.password, form.data):
-            raise ValidationError('Incorrect Original Password!')
+            raise ValidationError('Incorrect Original Password!') # compare hash of the submitted password to the hash in the db to ensure that they match
         if form.data == self.new_password.data:
-            raise ValidationError('Original and New Passwords cannot be the same!')
+            raise ValidationError('Original and New Passwords cannot be the same!') # new password should not be the same as the old one
         if self.new_password.data != self.confirm.data:
-            raise ValidationError('New Password does not match! Type again!')
+            raise ValidationError('New Password does not match! Type again!') # check to make sure that the two password fields match
 
 class DeleteForm(FlaskForm):
     password = PasswordField('', 
                              validators=[DataRequired()], 
-                             render_kw={"placeholder": "Enter Password"})
+                             render_kw={"placeholder": "Enter Password"}) # password needed to delete account
     submit = SubmitField('Delete')
 
     def validate_password(self, form):
-        if not check_password_hash(current_user.password, form.data):
+        if not check_password_hash(current_user.password, form.data): # compare hash of the submitted password to the hash in the db to ensure that they match
             raise ValidationError('Incorrect password')
