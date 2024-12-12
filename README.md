@@ -7,12 +7,12 @@
 
 Mac/Linux
 ```
-python -m venv /path/to/new/virtual/environment
+python3 -m venv /path/to/new/virtual/environment
 ```
 
 Windows
 ```
-python -m venv C:\path\to\new\virtual\environment
+python3 -m venv C:\path\to\new\virtual\environment
 ```
 
 2. Activate virtual environment
@@ -34,10 +34,10 @@ PS C:\> venv\Scripts\Activate.ps1
 
 3. Install all requirements
 ```
-python install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 ### Run project
 ```
-python run.py
+python3 run.py
 ```
