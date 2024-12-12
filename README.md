@@ -5,17 +5,13 @@
 ### Install the dependencies
 1. Create a virtual environment on your project directory
 
-Mac/Linux
+Mac/Linux & Windows
 ```
-python3 -m venv /path/to/new/virtual/environment
-```
-
-Windows
-```
-python3 -m venv C:\path\to\new\virtual\environment
+python3 -m venv venv
 ```
 
-2. Activate virtual environment
+
+2. Activate virtual environment. In your project directory:
 
 Mac/Linux on bash/zrc
 ```
