@@ -1,9 +1,21 @@
 # CMPE133-TaskMate
 
-## Instructions to run the project:
+## Instructions to run the project in the Terminal app:
+
+### Download and locate project directory
+1. Download the project source code from Github, and keep in mind where the directory was downloaded to on your system
+
+2. Open a new Terminal app window on your system
+
+3. Navigate to the project directory in Terminal
+
+Mac/Linux & Windows (the path after "cd" will depend on which directory your system downloads to and the name of the directory)
+```
+cd Downloads/CMPE133-TaskMate-main
+```
 
 ### Install the dependencies
-1. Create a virtual environment on your project directory
+1. Create a virtual environment in your project directory
 
 Mac/Linux & Windows
 ```
